@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\OrderController;
+use App\Models\ProductModel;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,6 +20,23 @@ use App\Http\Controllers\API\OrderController;
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('users', [AuthController::class, 'users']);
+
+    //Cart
+    Route::post('order', [OrderController::class, 'checkout']);
+
+    // Add Product
+    Route::post('addproduct', [ProductController::class, 'addproduct']);
+
+    Route::get('product/{id}/image', function ($id) {
+        $product = ProductModel::where('product_id', $id)->first();
+
+        if (!$product) {
+            return response()->json(['message' => 'Item not found'], 404);
+        }
+
+        $imagePath = $product->image_filepath;
+        return response()->file(public_path($imagePath));
+    });
 });
 
 //Register
@@ -30,5 +48,3 @@ Route::post('login', [AuthController::class, 'login']);
 // Products
 Route::get('products', [ProductController::class, 'products']);
 
-//Cart
-Route::post('order', [OrderController::class, 'checkout']);
